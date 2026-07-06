@@ -38,6 +38,7 @@
  * The above values will be the same _even if_ different values for `ENVIRONMENT` or `PUBLIC_BASE_URL` are set at runtime, as they are statically replaced in your code with their build time values.
  */
 declare module '$env/static/private' {
+	export const DATABASE_URL: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
 	export const ChocolateyInstall: string;
@@ -52,14 +53,7 @@ declare module '$env/static/private' {
 	export const COPILOT_DEBUG_NONCE: string;
 	export const DriverData: string;
 	export const EDITOR: string;
-	export const EFC_14404_1262719628: string;
 	export const EFC_14404_1592913036: string;
-	export const EFC_14404_2283032206: string;
-	export const EFC_14404_2775293581: string;
-	export const EFC_14404_3789132940: string;
-	export const EFC_14404_4126798990: string;
-	export const FPS_BROWSER_APP_PROFILE_STRING: string;
-	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const GIT_ASKPASS: string;
 	export const HOME: string;
 	export const HOMEDRIVE: string;
@@ -213,6 +207,7 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		DATABASE_URL: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
 		ChocolateyInstall: string;
@@ -227,14 +222,7 @@ declare module '$env/dynamic/private' {
 		COPILOT_DEBUG_NONCE: string;
 		DriverData: string;
 		EDITOR: string;
-		EFC_14404_1262719628: string;
 		EFC_14404_1592913036: string;
-		EFC_14404_2283032206: string;
-		EFC_14404_2775293581: string;
-		EFC_14404_3789132940: string;
-		EFC_14404_4126798990: string;
-		FPS_BROWSER_APP_PROFILE_STRING: string;
-		FPS_BROWSER_USER_PROFILE_STRING: string;
 		GIT_ASKPASS: string;
 		HOME: string;
 		HOMEDRIVE: string;
