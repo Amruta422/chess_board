@@ -45,6 +45,11 @@ async function getRankings() {
     LEFT JOIN matches m
       ON m.tournament_id = t.id
       AND m.winner_player_id = p.id
+    WHERE EXISTS (
+      SELECT 1
+      FROM matches played
+      WHERE played.tournament_id = t.id
+    )
     GROUP BY t.id, t.name, p.id, p.name, p.rating
     ORDER BY t.name ASC, place ASC, p.name ASC
   `);
@@ -204,36 +209,40 @@ export const actions = {
     const tournamentId = idValue(formData, 'tournament_id');
     if (!tournamentId) return fail(400, { message: 'Tournament id is required.' });
 
-    const created = await transaction(async (client) => {
-      const { rows: players } = await client.query(
-        'SELECT player_id FROM tournament_players WHERE tournament_id = $1 ORDER BY player_id ASC',
-        [tournamentId]
-      );
-
-      if (players.length < 2) {
-        throw new Error('Add at least two players before creating matches.');
-      }
-
-      const randomized = shuffle(players.map((player) => player.player_id));
-      const pairs = [];
-
-      for (let index = 0; index + 1 < randomized.length; index += 2) {
-        const whitePlayerId = randomized[index];
-        const blackPlayerId = randomized[index + 1];
-        const winnerPlayerId = Math.random() >= 0.5 ? whitePlayerId : blackPlayerId;
-        pairs.push([tournamentId, whitePlayerId, blackPlayerId, winnerPlayerId]);
-      }
-
-      for (const pair of pairs) {
-        await client.query(
-          'INSERT INTO matches (tournament_id, white_player_id, black_player_id, winner_player_id) VALUES ($1, $2, $3, $4)',
-          pair
+    try {
+      const created = await transaction(async (client) => {
+        const { rows: players } = await client.query(
+          'SELECT player_id FROM tournament_players WHERE tournament_id = $1 ORDER BY player_id ASC',
+          [tournamentId]
         );
-      }
 
-      return pairs.length;
-    });
+        if (players.length < 2) {
+          throw new Error('Add at least two players before creating matches.');
+        }
 
-    return { message: `${created} random match${created === 1 ? '' : 'es'} recorded.` };
+        const randomized = shuffle(players.map((player) => player.player_id));
+        const pairs = [];
+
+        for (let index = 0; index + 1 < randomized.length; index += 2) {
+          const whitePlayerId = randomized[index];
+          const blackPlayerId = randomized[index + 1];
+          const winnerPlayerId = Math.random() >= 0.5 ? whitePlayerId : blackPlayerId;
+          pairs.push([tournamentId, whitePlayerId, blackPlayerId, winnerPlayerId]);
+        }
+
+        for (const pair of pairs) {
+          await client.query(
+            'INSERT INTO matches (tournament_id, white_player_id, black_player_id, winner_player_id) VALUES ($1, $2, $3, $4)',
+            pair
+          );
+        }
+
+        return pairs.length;
+      });
+
+      return { message: `${created} random match${created === 1 ? '' : 'es'} recorded.` };
+    } catch (error) {
+      return fail(400, { message: error instanceof Error ? error.message : 'Unable to create matches.' });
+    }
   }
 };
